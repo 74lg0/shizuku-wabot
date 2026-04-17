@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "sharp": "^0.34.5",

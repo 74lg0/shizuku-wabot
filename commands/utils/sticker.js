@@ -1,11 +1,12 @@
 const { Sticker, StickerTypes } = require('wa-sticker-formatter');
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
 
 module.exports = {
     nombre: "sticker",
     aliases: ["s", "stiker", "stick"],
     categoria: "Utilidades",
     descripcion: "Convierte imagen o video corto en sticker",
-    uso: "?s",
+    uso: "s",
 
     ejecutar: async (sock, msg, args, { prefix }) => {
         const jid = msg.key.remoteJid;
@@ -30,29 +31,46 @@ module.exports = {
             // === PROTECCIÓN CONTRA VIDEOS LARGOS ===
             if (isVideo) {
                 const videoInfo = mediaMsg.videoMessage;
-                const duration = videoInfo.seconds || 0;        // duración en segundos
+                const duration = videoInfo.seconds || 0;
                 const fileSize = videoInfo.fileLength ? Number(videoInfo.fileLength) : 0;
 
-                if (duration > 15) {   // límite conservador (WhatsApp recomienda ~10s)
+                if (duration > 15) {
                     return sock.sendMessage(jid, {
                         text: `❌ El video es demasiado largo (${duration}s).\n\nMáximo permitido: 15 segundos.`
                     });
                 }
 
-                if (fileSize > 15 * 1024 * 1024) { // 15 MB
+                if (fileSize > 15 * 1024 * 1024) {
                     return sock.sendMessage(jid, {
                         text: `❌ El video es demasiado pesado (${(fileSize/1024/1024).toFixed(1)} MB).\nMáximo recomendado: 15 MB.`
                     });
                 }
             }
 
-            // Descargar media
-            const buffer = await sock.downloadMediaMessage({ message: mediaMsg });
+            // === DESCARGA CORRECTA DE MEDIA ===
+            const getBuffer = async (mediaMsg) => {
+                let stream;
+
+                if (mediaMsg.imageMessage) {
+                    stream = await downloadContentFromMessage(mediaMsg.imageMessage, 'image');
+                } else if (mediaMsg.videoMessage) {
+                    stream = await downloadContentFromMessage(mediaMsg.videoMessage, 'video');
+                }
+
+                let buffer = Buffer.from([]);
+                for await (const chunk of stream) {
+                    buffer = Buffer.concat([buffer, chunk]);
+                }
+
+                return buffer;
+            };
+
+            const buffer = await getBuffer(mediaMsg);
 
             const sticker = new Sticker(buffer, {
                 pack: "★彡[ꜱʜɪᴢᴜᴋᴜ ʙᴏᴛ]彡★",
                 author: "74lg0",
-                type: StickerTypes.FULL,     // FULL = normal | CIRCLE = redondo
+                type: StickerTypes.FULL,
                 quality: 70,
                 background: 'transparent'
             });
@@ -64,7 +82,7 @@ module.exports = {
             }, { quoted: msg });
 
         } catch (err) {
-            console.error("Error creando sticker:", err.message);
+            console.error("Error creando sticker:", err);
             await sock.sendMessage(jid, {
                 text: "❌ Error al procesar el archivo.\nIntenta con una imagen o un video más corto."
             });

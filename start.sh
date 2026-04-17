@@ -73,14 +73,18 @@ show_menu() {
     echo ""
 }
 
-# Función para iniciar bot
+# Inicializar de forma segura
 start_bot() {
     if pm2 list | grep -q "$BOT_NAME"; then
         echo -e "${YELLOW}⚠️  El bot ya está registrado. Intentando iniciar...${RESET}"
         pm2 start "$BOT_NAME"
     else
-        echo -e "${GREEN}▸ Registrando e iniciando bot...${RESET}"
-        pm2 start "$SCRIPT_PATH" --name "$BOT_NAME"
+        echo -e "${GREEN}▸ Registrando e iniciando bot (modo npm start)...${RESET}"
+        
+        pm2 start npm \
+            --name "$BOT_NAME" \
+            -- start
+        
         pm2 save
     fi
     
