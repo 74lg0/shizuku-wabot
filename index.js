@@ -11,7 +11,6 @@ const path = require("path");
 const { cargarComandos } = require("./commands/loader");
 const { manejarMensajes } = require("./handlers/messageHandler");
 const { manejarConexion } = require("./handlers/connectionHandler");
-const { iniciarScheduler } = require("./handlers/scheduler");
 
 // ── Cargar config ─────────────────────────────────────────────────────────────
 const CONFIG_PATH = "./config.json";
