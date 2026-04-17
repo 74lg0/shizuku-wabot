@@ -5,7 +5,7 @@ const configPath = path.join(__dirname, '../../config.json');
 module.exports = {
     nombre: "welcome",
     aliases: ["bienvenida"],
-    categoria: "Grupo",
+    categoria: "Admin",
     descripcion: "Activa o desactiva el mensaje de bienvenida automática",
     uso: "welcome on / welcome off",
 
