@@ -66,7 +66,6 @@ async function iniciarBot() {
 
     manejarConexion(sock, iniciarBot);
     manejarMensajes(sock, comandos, config);
-    iniciarScheduler(sock);
 
     // ←←← Cargar eventos aquí (después de crear el sock)
     cargarEventos(sock);
